@@ -15,7 +15,13 @@ module Fuel
     end
 
     def embedded_svg filename, options={}
-      path = Rails.application.assets.find_asset(filename).pathname
+      path =
+        if Rails.env.development?
+          Rails.application.assets.find_asset(filename).pathname
+        else
+          name = Rails.application.assets_manifest.assets[filename]
+          File.join(Rails.public_path, 'assets', name)
+        end
       file = File.read(path)
       doc = Nokogiri::HTML::DocumentFragment.parse file
       svg = doc.at_css 'svg'
